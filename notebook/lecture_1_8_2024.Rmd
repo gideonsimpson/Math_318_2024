@@ -1,0 +1,90 @@
+---
+title: "Lecture 1/8/2024"
+output:
+  html_document:
+    df_print: paged
+  html_notebook: default
+  pdf_document: default
+---
+
+# Elementary R
+
+Examples of creating scalar variables and combining them:
+
+```{r}
+x=5
+y=3
+z = x+y
+print(z)
+```
+
+```{r}
+z
+```
+
+Strings are also possible:
+
+```{r}
+data_name = "day one example"
+print(data_name)
+```
+
+# Arrays
+
+Arrays are constructed using `c` for *combine*:
+
+```{r}
+data = c(1,2,3)
+print(data)
+```
+
+```{r}
+data_names = c("age", "height", "weight")
+print(data_names)
+```
+
+Access elements with brackets:
+
+```{r}
+data[1]
+```
+
+```{r}
+data_names[2]
+```
+
+Whole array operations are possible with numeric data:
+
+```{r}
+x=c(1., 2., 3.)
+y=c(4., -2.4, 3.8)
+```
+
+```{r}
+x+y
+```
+
+```{r}
+x*y
+```
+
+Arrays of uniformly spaced elements:
+
+```{r}
+seq(0,1)
+```
+
+```{r}
+seq(0,1,length=11)
+```
+
+eleven uniformly spaced points from 0 to 1, inclusive
+
+```{r}
+x = seq(0,1,length=11)
+```
+
+```{r}
+y = sin(x)
+y
+```
