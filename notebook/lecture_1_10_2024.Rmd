@@ -1,0 +1,100 @@
+---
+title: "Lecture 1/10/2024"
+output: html_notebook
+---
+
+# Generating Random Variables in R
+
+## Uniform Random Variables
+
+```{r}
+runif(1)
+```
+
+```{r}
+runif(10)
+```
+
+These examples are $U(0,1)$ examples. For $U(a,b)$, set the `min` and `max` values as desired:
+
+```{r}
+runif(1,min=-1, max=2) # U(-1,2) variable
+```
+
+```{r}
+runif(5,min=-1, max=2) 
+```
+
+## Reproducibility and Seeds
+
+```{r}
+runif(1)
+```
+
+```{r}
+runif(1)
+```
+
+Note that these are *pseudo*-random number generators. There is a deterministic algorithm lurking inside.
+
+Reproducibility is achieved by setting the *seed*:
+
+```{r}
+set.seed(100)
+```
+
+```{r}
+runif(5)
+```
+
+Reset the seed to the same value and call again:
+
+```{r}
+set.seed(100)
+```
+
+```{r}
+runif(1)
+```
+
+```{r}
+runif(2)
+```
+
+Changing the seed gives a difference sequence:
+
+```{r}
+set.seed(200)
+```
+
+```{r}
+runif(1)
+```
+
+Set the seed at the beginning of any code using random number generation for reproducibility. Also essential for debugging and software development.
+
+## Normal Random Variables
+
+For $N(0,1)$:
+
+```{r}
+rnorm(1)
+```
+
+```{r}
+rnorm(10)
+```
+
+In R, normal $N(m,\sigma^2)$ is parametrized by $m$ and $\sigma$, the standard dev:
+
+```{r}
+rnorm(5, 1, 0.1)
+```
+
+# Markdown 
+
+Greek letters rendered in LaTeX:
+
+$\sigma$, $\alpha$, $\beta$, $\gamma$ $\delta$, $\Sigma$, $\Xi$ , $\Psi$ $\psi$
+
+For bits of code, use single quotes: `min` ,`f` , `mean`
