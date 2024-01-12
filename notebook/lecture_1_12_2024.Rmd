@@ -1,0 +1,148 @@
+---
+title: "1/12/2024 Lecture"
+output: html_notebook
+---
+
+# Elementary Statistics in R
+
+Generate a basic numeric data set:
+
+```{r}
+set.seed(123)
+xdata = rnorm(100)
+print(xdata)
+```
+
+Basic summary stastistics of data:
+
+```{r}
+summary(xdata)
+```
+
+More specific quantities:
+
+```{r}
+print(mean(xdata))
+```
+
+```{r}
+print(median(xdata))
+```
+
+```{r}
+print(var(xdata))
+```
+
+```{r}
+print(sd(xdata))
+```
+
+```{r}
+print(quantile(xdata))
+```
+
+By default, `quantile` gives the 4 quartiles. Suppose we want the quintiles, instead, values at 0%, 20%, 40%, 60%, 80%, 100%:
+
+1.  Create an array of values, `pvals` that contains the values at which we want the quantile function
+2.  Evaludate `quantile(xdata, probs=pvals)`
+
+```{r}
+pvals = c(0, .2, .4, .6, .8, 1)
+```
+
+```{r}
+quantile(xdata, probs = pvals)
+```
+
+```{r}
+pvals2=c(0.2, .87, .99)
+quantile(xdata, probs = pvals2)
+```
+
+# Control Structures in R
+
+For loops, if-then-else's,
+
+```{r}
+for (j in 1:5){
+  print(j)
+}
+```
+
+# Intro to Data Frames (tibbles)
+
+These are built in, but we're going to use `tibble`, part of the `tidyverse`
+
+```{r}
+library(tidyverse) # loads the entire package fore use, a la import from python
+```
+
+Create a data frame:
+
+```{r}
+cast=tibble("Names"=c("Jerry", "George", "Elaine", "Cosmo"), "Ages"=c(38, 38, 37, 999))
+```
+
+```{r}
+cast
+```
+
+999 is a "garbage" value that really reflects that the measurement was unavailable. Try to clean out garbage values. Use `NA` value. Plays an analogous role to `Inf`
+
+```{r}
+cast$Names # access columns
+```
+
+```{r}
+cast$Ages # access columns
+```
+
+```{r}
+cast$Ages[4]=NA
+```
+
+```{r}
+cast
+```
+
+```{r}
+summary(cast)
+```
+
+This is an elementary data cleaning example.
+
+# Read an Excel Sheet into R
+
+This builds on a `tidyverse` function
+
+```{r}
+library(readxl) # this provides Excel reading functions
+```
+
+```{r}
+grades = read_excel("../data/Grades.xlsx")
+```
+
+```{r}
+grades
+```
+
+`<dbl>` refers to double precision floating point numbers (i.e., the reals).
+
+```{r}
+summary(grades)
+```
+
+We will return to how to get R to interpret different columns as different data types (i.e., categorical).
+
+```{r}
+grades[1,] # first row
+```
+
+```{r}
+grades[15,] # 15th row
+```
+
+```{r}
+grades[2] # with no comma, second column
+```
