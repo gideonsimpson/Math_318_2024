@@ -1,0 +1,237 @@
+---
+title: "1/17/2024 Lecture"
+output: html_notebook
+---
+
+# Loading/Exploring Data Sets
+
+```{r}
+library(tidyverse)
+library(readxl)
+```
+
+```{r}
+grades=read_excel("../data/Grades.xlsx")
+```
+
+## Setting Data Types in Data Frames
+
+```{r}
+grades
+```
+
+Note that both columns are stored as `<dbl>` , this is the double precision data type from C/C++/Java/Python/MATLAB/etc.
+
+```{r}
+summary(grades)
+```
+
+**NOTE** the statistics on the Student (ID), are meaningless.
+
+We will let R know that it is a categorical variable:
+
+```{r}
+grades$Student = factor(grades$Student)
+```
+
+The above converts the data type of the column to `<fctr>` type, which is for categorical variables.
+
+```{r}
+grades
+```
+
+We can also set the Grade type to be an integer:
+
+```{r}
+grades$Grade=as.integer(grades$Grade)
+```
+
+```{r}
+grades
+```
+
+Now summarize:
+
+```{r}
+summary(grades)
+```
+
+## Repeat this with CSV type data
+
+```{r}
+grades.csv = read.csv("../data/Grades.csv")
+```
+
+```{r}
+grades.csv
+```
+
+This has been read in as a `df`, the default R, data frame (**NOT** yet a tibble). Usually worth converting to a tibble:
+
+```{r}
+grades.csv=as.tibble(grades.csv)
+```
+
+```{r}
+grades.csv
+```
+
+Fix the data type of Student:
+
+```{r}
+grades.csv$Student=as.factor(grades$Student)
+```
+
+`as.factor` and `as_factor` are the same thing. True of many commands in R, `as.integer` and `as_integer` .
+
+## Exporting data
+
+```{r}
+x=seq(0,1,length=11) # create some data
+```
+
+```{r}
+write.csv(x,file="../data/sample.csv")
+```
+
+Export summary data.
+
+```{r}
+grades.summary = summary(grades)
+```
+
+```{r}
+write.csv(grades.summary,file="grades.summary.txt")
+```
+
+How to export to latex as a table
+
+```{r}
+library(xtable)
+```
+
+**NOTE** `xtable` expects a data frame type as its input argument. This can be a tibble or a default data frame. We must first map it to a data frame with `as.data.frame`
+
+```{r}
+xtable(as.data.frame(x))
+```
+
+Get into a text file:
+
+```{r}
+print.xtable(xtable(as.data.frame(x)), file="tex_table.txt")
+```
+
+# Plotting and Visualization
+
+## Basic Plotting with Built in functions
+
+Make some basic data
+
+```{r}
+x=seq(0,1,length=51)
+y = x*(1-x) # this is a parabola, x vs. y
+```
+
+Plot the parabola
+
+```{r}
+plot(x,y)
+```
+
+**NOTE** The default plotting is too bland for anything but a quick visualization.
+
+Add some color and annotations:
+
+```{r}
+plot(x,y, main="Example Plot", xlab="x", ylab="x(1-x)", type="l", col="blue", lwd=2)
+```
+
+The additional arguments:
+
+-   `main` - plot title
+
+-   `xlab` - x axis label
+
+-   `ylab` - y axis label
+
+-   `type` - line with `l`, instead. of a scatter plot (default)
+
+-   `col` - color
+
+-   `lwd`  - linewidth in pts.
+
+What are our color options?
+
+```{r}
+colors()
+```
+
+```{r}
+plot(x,y, main="Example Plot", xlab="x", ylab="x(1-x)", type="l", col="mediumorchid1", lwd=2)
+```
+
+Suppose we want to just export the figure:
+
+```{r}
+pdf(file="plot1.pdf", height=5.5, width=4) # note, need to specify height/width (in inches)
+plot(x,y, main="Example Plot", xlab="x", ylab="x(1-x)", type="l", col="mediumorchid1", lwd=2)
+dev.off() # stop writing to the file with this command
+```
+
+If the pdf format is ever too big, use `png` instead.
+
+## Boxplots
+
+```{r}
+set.seed(100)
+x=rnorm(100, mean=10, sd=2) # generate some data
+```
+
+```{r}
+boxplot(x)b
+```
+
+-   Solid line is the median
+
+-   The box is the interquartile range, middle 50% of the data
+
+-   Stems are the max/mins
+
+-   If they show up, scatter points are "outliers"
+
+Make this more interesting:
+
+```{r}
+boxplot(x, main="Sample Box Plot", horizontal = TRUE, 
+        col="red", xlab="x", ylab="Samples 1", cex.lab=1.5, cex.axis=1.25, cex.main=2)
+```
+
+-   `horizontal` changes the orientation
+
+-   `cex.lab` , `cex.axis` and `cex.main` - control the font sizes as percentages of the default.
+
+## Histogram
+
+```{r}
+x=rnorm(10^4, mean=2, sd=2)
+```
+
+```{r}
+hist(x)
+```
+
+Annotate and improve:
+
+```{r}
+hist(x, breaks=50, main="N(2,2^2) Data", xlab="x", col="snow2", prob=TRUE)
+```
+
+By setting `prob=TRUE` , we are estimating the density, as in the probability density, from the data. Compare against analytic solution:
+
+```{r}
+hist(x, breaks=50, main="N(2,2^2) Data", xlab="x", col="snow2", prob=TRUE)
+curve(dnorm(x, mean=2, sd=2), add=TRUE, col="navy", lwd=2)
+```
+
+`curve` plots a curve, `dnorm` specifies the function is the density of the normal, withe specificed `mean` and `sd` , `add=TRUE` adds it to the existing plot
