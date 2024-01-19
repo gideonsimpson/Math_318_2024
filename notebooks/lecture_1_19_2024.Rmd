@@ -1,0 +1,167 @@
+---
+title: "1/19/2024 Lecture"
+output: html_notebook
+---
+
+# Better Graphics with ggplot2
+
+As noted, the default graphics package in R is ok, but not great. Substantially better, out of the box, graphics can be generated with the `ggplot2` , which is part of the `tidyverse` :
+
+```{r}
+library(tidyverse)
+```
+
+The way of thinking of `ggplot2` graphics is in terms of addition, in that you will add graphical elements together, with the `+` , incrementally improving your plot. Roughly, you should think about it in terms of
+
+Figure = Data Set + Graphical Manipulations of the data + Annotations
+
+While it is not essential to create a data set, as a data frame (tibble or otherwise), to use `ggplot2` , there are advantages to using data frames here too.
+
+## Parabola Plot
+
+First, we will plot the parabola, $x(1-x)$ , manually:
+
+```{r}
+x = seq(0,1,length=51)
+y = x*(1-x)
+xy.plt = ggplot(mapping = aes(x,y))
+```
+
+This has created a plot, `xy.plt` which has, as its data, the *aesthetic*, `aes` . At this point, we see nothing. We can get the figure on the screen with the `print` command:
+
+```{r}
+print(xy.plt)
+```
+
+We now have a figure, but nothing in it. This is because we have not told it how to, geometrically, interpret the data.
+
+### Scatter Plot
+
+We have several options:
+
+```{r}
+xy.plt.point = xy.plt+geom_point() # interpret the data with a scatter plot
+print(xy.plt.point)
+```
+
+### Line Plot
+
+```{r}
+xy.plt.line = xy.plt+geom_line() # interpret the data with a line plot
+print(xy.plt.line)
+```
+
+### Titles
+
+We can add a title to the plot with `ggtitle` :
+
+```{r}
+xy.plt.title = xy.plt+geom_line()+ggtitle("Parabola Plot") # interpret the data with a line plot
+print(xy.plt.title)
+```
+
+### Saving to Disk
+
+Figures can be saved to disk with the `ggsave` command:
+
+```{r}
+ggsave("ggplt1.pdf", plot = xy.plt.title, width = 6, height = 4) # size in inches
+```
+
+### Working with Data Frames
+
+As noted, `ggplot2` plays nicely with data frames. First, we will stick our data into a data frame and then build on that:
+
+```{r}
+xy.df=tibble(Position=x,Velocity=y) # These are sample variable names
+xy.df
+```
+
+```{r}
+df.plt = ggplot(xy.df) + geom_line(mapping=aes(x=Position,y=Velocity), color="darkorange1",lwd=2) + 
+  ggtitle("Plotting with a data frame")
+print(df.plt)
+```
+
+Notice that it automatically picks up the variable names from the data frame for the axes
+
+## Visualizing the Auto Data Frame
+
+The `Auto` data frame is part of the `ISLR2` package:
+
+```{r}
+library(ISLR2)
+```
+
+```{r}
+Auto = as_tibble(Auto)
+Auto
+```
+
+Before visualizing this, we will convert certain properties to categorical (factor) types:
+
+```{r}
+Auto$cylinders = as_factor(Auto$cylinders)
+Auto$origin = as_factor(Auto$origin)
+```
+
+### Boxplots
+
+This is a good data set to use boxplots on, as we can compare the fuel efficiency as a function of region of origin or number of cylinders in the engine:
+
+```{r}
+mpg.plt = ggplot(Auto) # we will reuse this 
+mpg.plt1 = mpg.plt + geom_boxplot(mapping = aes(x=origin, y= mpg))
+print(mpg.plt1)
+```
+
+```{r}
+mpg.plt2 = mpg.plt + geom_boxplot(mapping = aes(x=cylinders, y= mpg))
+print(mpg.plt1)
+```
+
+**NOTE** that we changed the horizontal grouping by changing the `x` argument to the `aes`. We can further slice our data, visualizing the breakdowns together:
+
+```{r}
+mpg.plt3 = mpg.plt + geom_boxplot(mapping = aes(x=cylinders, y= mpg, fill=origin))
+print(mpg.plt3)
+
+```
+
+```{r}
+mpg.plt4 = mpg.plt + geom_boxplot(mapping = aes(x=origin, y= mpg, fill=cylinders))
+print(mpg.plt4)
+
+```
+
+What's interesting about this plot is that you see that certain geographic regions only produce cars with some cylinder counts; only 4 and 6 cylinder engines are produced in all three regions.
+
+### Histograms
+
+We can perform similar analysis with histograms
+
+```{r}
+hist.mpg.plt1 = mpg.plt + geom_histogram(aes(x=mpg), bins=10) + ggtitle("MPG Distribution")
+print(hist.mpg.plt1)
+```
+
+**NOTE:** I manually set `bins=10` , as in 10 histogram bins, because a warning was generated with the default value
+
+```{r}
+hist.mpg.plt2 = mpg.plt + geom_histogram(aes(x=mpg,fill=origin)) + ggtitle("MPG Distribution by Origin")
+print(hist.mpg.plt2)
+```
+
+Alternatively, we can set `color` :
+
+```{r}
+hist.mpg.plt3 = mpg.plt + geom_histogram(aes(x=mpg,color=origin), bins=10) + ggtitle("MPG Distribution by Origin")
+print(hist.mpg.plt3)
+```
+
+And we can improve the readability by making the bars transparent (changing `alpha` ):
+
+```{r}
+hist.mpg.plt4 = mpg.plt + geom_histogram(aes(x=mpg,fill=origin), bins=10, alpha=0.7) + ggtitle("MPG Distribution by Origin")
+print(hist.mpg.plt4)
+```

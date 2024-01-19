@@ -159,7 +159,7 @@ The additional arguments:
 
 -   `col` - color
 
--   `lwd`  - linewidth in pts.
+-   `lwd` - linewidth in pts.
 
 What are our color options?
 
@@ -234,4 +234,4 @@ hist(x, breaks=50, main="N(2,2^2) Data", xlab="x", col="snow2", prob=TRUE)
 curve(dnorm(x, mean=2, sd=2), add=TRUE, col="navy", lwd=2)
 ```
 
-`curve` plots a curve, `dnorm` specifies the function is the density of the normal, withe specificed `mean` and `sd` , `add=TRUE` adds it to the existing plot
+`curve` plots a curve, `dnorm` specifies the function is the density of the normal, withe specified `mean` and `sd` , `add=TRUE` adds it to the existing plot
