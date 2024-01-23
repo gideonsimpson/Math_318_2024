@@ -1,0 +1,97 @@
+---
+title: "Lecture 1/22/2024"
+output: html_notebook
+---
+
+# Q-Q Plots
+
+```{r}
+set.seed(100)
+u = runif(10^3) # U(0,1)
+v = runif(2000, min=10, max=25) # U(10,25)
+w = runif(100) # U(0,1)
+x = rnorm(10^4) # N(0,1)
+y = rnorm(5000, mean=10, sd =2) #N(10,2^2)
+```
+
+Use `qqplot` to compare data sets:
+
+```{r}
+qqplot(u,v)
+```
+
+This is a line, but it is not $y=x$, so these are not the same distribution.
+
+```{r}
+qqplot(u,w)
+```
+
+This is close to $y=x$, and it should be
+
+```{r}
+qqplot(u,x)
+```
+
+Comparison of $N(0,1)$ with $U(0,1)$; this is really not a line now.
+
+```{r}
+qqplot(x,y)
+```
+
+Two different normals, they sit on a line, but it's not $y=x$
+
+```{r}
+qqnorm(x)
+```
+
+`qqnorm` checks a single data set against $N(0,1)$
+
+# Adding additional annotations
+
+```{r}
+library(tidyverse)
+library(ISLR2)
+```
+
+```{r}
+Auto$origin=as_factor(Auto$origin)
+Auto$cylinders=as_factor(Auto$cylinders)
+```
+
+```{r}
+mpg.plt = ggplot(Auto) # we will reuse this 
+mpg.plt1 = mpg.plt + geom_boxplot(mapping = aes(x=origin, y= mpg))
+print(mpg.plt1)
+```
+
+```{r}
+summary(Auto$origin)
+```
+
+This could be in a caption or the text, but can we get into the figure directly?
+
+Add an annotation:
+
+```{r}
+mpg.plt2 = mpg.plt1 + annotate("text", x=c(1.1, 2.1, 3.1), y = c(30, 40, 45), 
+                               label=sprintf("n=%d", summary(Auto$origin)),
+                               color="red")
+print(mpg.plt2)
+```
+
+What did we do:
+
+-   `text` - says the figure annotation will be a text object
+
+-   `x` and `y` - these are selected by guess and check as to where to put the labels
+
+-   `label=sprintf` - this is C/C++ style string formatting.
+
+Alternatively, turn the summary information into a data frame itself:
+
+```{r}
+summary.df= tally(group_by(Auto, origin))
+summary.df
+```
+
+`tally` sums up the data in each case from the `group_by`.
