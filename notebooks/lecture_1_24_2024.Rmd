@@ -1,0 +1,117 @@
+---
+title: "1/24/2024 Lecture"
+output: html_notebook
+---
+
+```{r}
+library(ISLR2)
+library(tidyverse)
+```
+
+# Correlations
+
+## Model Problem
+
+Create data
+
+$$
+y_i = x_i^3 + \epsilon_i
+$$
+
+Think of $\epsilon$ as "noise" in the measurements, and for simplicity, assume $\epsilon_i \sim N(0, \sigma^2)$ for some particular variance, $\sigma$ .
+
+```{r}
+set.seed(100) # set a seed for reproducibility
+x <- seq(-5, 5, length=101) # 101 uniformly spaced points between -5 and 5
+xi <-  rnorm(length(x)) # create a vector of Gaussians with same size as x, N(0,1)
+df
+# look at different magnitude noises
+sigma2_vals = c(0, 10, 50,100, 500) 
+
+# store in a data structure, data frame, with the columns we want
+df <- tibble(x = numeric(), y=numeric(), noise=factor())
+df
+```
+
+```{r}
+#populate the data frame
+for(j in 1:length(sigma2_vals)){
+  sigma2 = sigma2_vals[j] # get the jth coordinate
+  y <- x^3 + (sigma2) * xi # add noise with variance sigma2 to x^3
+  df <- add_row(df, x = x, y = y, noise = as.factor(sigma2))
+}
+df
+```
+
+```{r}
+correlations=c() # empty to start
+for(j in 1:length(sigma2_vals)){
+  sigma2 = sigma2_vals[j] # look at just the j-th noise case
+  correlations <- append(correlations, 
+                         cor(filter(df, noise == sigma2)$x,
+                             filter(df, noise == sigma2)$y))
+}
+correlations
+```
+
+```{r}
+cubic.plt=ggplot(df) + geom_point(aes(x,y, color=noise))
+cubic.plt = cubic.plt + scale_color_discrete(name="Noise Intensity")
+print(cubic.plt)
+```
+
+## Auto Data Set Problem
+
+```{r}
+Auto$cylinders = as_factor(Auto$cylinders)
+Auto$origin = as_factor(Auto$origin)
+Auto$year = as_factor(Auto$year)
+```
+
+```{r}
+cor(select_if(Auto, is.numeric))
+```
+
+```{r}
+pairs(select_if(Auto, is.numeric))
+```
+
+# More on ggplot
+
+## Pair Correlations
+
+A `ggplot`, `ggpairs`, provides better pair correlation figures, but it requires the `GGally` package to be installed
+
+```{r}
+library(GGally)
+```
+
+```{r}
+auto.pairs.plt = ggpairs(select_if(Auto, is.numeric)) + 
+  ggtitle("Pair Correlations for Auto")
+print(auto.pairs.plt)
+```
+
+## Facets and Grids
+
+Layout subplots
+
+```{r}
+Auto.facet.gplt = ggplot(Auto) + geom_point(aes(horsepower, mpg))
+Auto.facet.gplt = Auto.facet.gplt + facet_wrap(~cylinders, nrow=2)
+Auto.facet.gplt = Auto.facet.gplt + ggtitle("Horsepower vs mpg, by Cylinders")
+print(Auto.facet.gplt)
+```
+
+We can use `facet_grid` to split along two different categorical variables
+
+```{r}
+Auto.grid.gplt = ggplot(Auto) + geom_point(aes(horsepower, mpg))
+Auto.grid.gplt = Auto.grid.gplt + facet_grid(origin~cylinders)
+Auto.grid.gplt = Auto.grid.gplt+ ggtitle("Horsepower vs mpg, by Cylinders and Origin")
+print(Auto.grid.gplt)
+```
+
+## QQ Plots (revisited)
+
+## Annotations (revisited)
