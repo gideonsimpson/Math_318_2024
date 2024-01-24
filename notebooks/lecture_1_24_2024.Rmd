@@ -8,6 +8,28 @@ library(ISLR2)
 library(tidyverse)
 ```
 
+# Boxplot Annotations (Continued)
+
+```{r}
+Auto$cylinders = as_factor(Auto$cylinders)
+Auto$origin = as_factor(Auto$origin)
+Auto$year = as_factor(Auto$year)
+```
+
+```{r}
+summary.df= tally(group_by(Auto, origin))
+summary.df
+```
+
+```{r}
+auto.plt = ggplot(Auto)
+auto.plt = auto.plt+geom_boxplot(aes(x=origin, y = mpg))
+auto.plt = auto.plt+geom_label(data=summary.df, aes(x=origin, label=sprintf("n = %d",n)), 
+                       y =max(Auto$mpg), color="red")
+
+print(auto.plt)
+```
+
 # Correlations
 
 ## Model Problem
@@ -63,12 +85,6 @@ print(cubic.plt)
 ## Auto Data Set Problem
 
 ```{r}
-Auto$cylinders = as_factor(Auto$cylinders)
-Auto$origin = as_factor(Auto$origin)
-Auto$year = as_factor(Auto$year)
-```
-
-```{r}
 cor(select_if(Auto, is.numeric))
 ```
 
@@ -114,4 +130,18 @@ print(Auto.grid.gplt)
 
 ## QQ Plots (revisited)
 
-## Annotations (revisited)
+Is MPG normally distributed?
+
+```{r}
+auto.qq1.plt <- ggplot(Auto, aes(sample=mpg))+geom_qq()+geom_qq_line()
+print(auto.qq1.plt)
+
+```
+
+What happens if we break out by origin?
+
+```{r}
+auto.qq2.plt <- ggplot(Auto, aes(sample=mpg, color=origin))+geom_qq()+geom_qq_line()
+print(auto.qq2.plt)
+
+```
