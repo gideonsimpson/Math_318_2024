@@ -1,0 +1,200 @@
+---
+title: "Lecture 1/26/2024"
+output: html_notebook
+---
+
+```{r}
+library(tidyverse)
+library(ISLR2)
+```
+
+# Confidence Intervals
+
+We will build CI's of the form
+
+$$
+(\bar{x}_N - 1.96\sigma_N/\sqrt{N},\bar{x}_N + 1.96\sigma_N/\sqrt{N})
+$$
+
+or, more generally,
+
+$$
+(\bar{x}_N - z_{1-\alpha/2}\sigma_N/\sqrt{N},\bar{x}_N +  z_{1-\alpha/2}\sigma_N/\sqrt{N})
+$$
+
+## Naive Computation
+
+Generate some data, then compute the CI for the mean.
+
+```{r}
+set.seed(100)
+x = rexp(100) # exponentially distributed random variables, not Gaussian
+```
+
+```{r}
+hist(x)
+```
+
+Pick an $\alpha$, $\alpha = 0.05$ and compute the CI:
+
+```{r}
+alpha = .05
+z = qnorm(1-alpha/2)
+z
+```
+
+```{r}
+qnorm(alpha/2) # NOTE, this the negative
+```
+
+The CI is then:
+
+```{r}
+xbar = mean(x)
+sigma= sqrt(var(x))
+N = 100;
+CI = c(xbar - z * sigma/sqrt(N),xbar + z * sigma/sqrt(N))
+CI
+```
+
+CLAIM: True mean is 1 for this example
+
+## T-Test
+
+In the above computation, we assumed $N$ was large enough for the Central Limit Theorem to take over. But sometimes $N$ is too small, and/or the variance is too large. Use the T-test, or Student $t$ distribution to compensate. Like the Central Limit Theorem for small $N$
+
+```{r}
+t.test(x)
+```
+
+```{r}
+t.test(x,conf.level=0.99)
+```
+
+For $N$ large enough, T-Test will be the same as the CLT result.
+
+# More Data Frame Manipulation
+
+## Adding Rows and Columns
+
+Create a toy data frame:
+
+```{r}
+toy.df = tibble(x=1:3, y = 4:6)
+```
+
+```{r}
+toy.df
+```
+
+Two features (columns), `x` and `y` , and 3 samples.
+
+We want to add a new sample:
+
+```{r}
+toy2.df = add_row(toy.df, x=5, y = -8)
+```
+
+```{r}
+toy.df
+```
+
+```{r}
+toy2.df
+```
+
+Piping - language feature of R, and it's built around the command `%>%` :
+
+Example:
+
+```{r}
+toy3.df =toy.df %>% add_row(x=5, y = -8)
+toy3.df
+```
+
+Add a feature:
+
+```{r}
+add_column(toy.df, day=c("Monday", "Friday", "Saturday"))
+```
+
+`toy.df` is unchanged:
+
+```{r}
+toy.df
+```
+
+Piping features and samples:
+
+```{r}
+toy.final.df = toy.df %>% add_column(day=c("Monday", "Friday", "Saturday")) %>% add_row(x=5, y = -8, day="Blaturday")
+```
+
+```{r}
+toy.final.df
+```
+
+## Merging Data Frames
+
+Working with the Wine data sets form [Wine Quality - UCI Machine Learning Repository](https://archive.ics.uci.edu/dataset/186/wine+quality). Two challenges:
+
+-   Two different data sets for read and white
+
+-   Semi-colon separated, instead of comma separated
+
+```{r}
+white.df = read.csv("~/code/Math_318_2024/data/wine+quality/winequality-white.csv", sep=";") %>% as_tibble
+white.df
+```
+
+`read.csv` returns a default R data frame, we then pipe it in, `%>%` to make a tibble.
+
+```{r}
+red.df = read.csv("~/code/Math_318_2024/data/wine+quality/winequality-red.csv", sep=";") %>% as_tibble
+red.df
+```
+
+Use `union_all` to combine data frames:
+
+```{r}
+attemp1.df = union_all(white.df, red.df)
+attemp1.df
+```
+
+**NOTE** we have lost information as to wine color. Go back, add that in, and then join:
+
+```{r}
+white.df = white.df %>% add_column(color="white")
+white.df
+```
+
+```{r}
+red.df = red.df %>% add_column(color="red")
+red.df
+```
+
+Now combine:
+
+```{r}
+wine.df = union_all(white.df, red.df)
+wine.df
+```
+
+## Cleaning Data
+
+Create a data frame with a missing entry:
+
+```{r}
+x=1:10
+y = x^2 
+y[4]=NA # put a missing entry into the data
+messy.df = tibble(x=x, y=y)
+messy.df
+```
+
+Filter out samples with missing entries:
+
+```{r}
+clean.df = messy.df %>% na.omit() # drops samples with missing entries
+clean.df
+```
