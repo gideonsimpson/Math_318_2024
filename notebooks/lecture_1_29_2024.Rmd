@@ -1,0 +1,114 @@
+---
+title: "Lecture 1/29/2024"
+output: html_notebook
+---
+
+```{r}
+library(tidyverse)
+library(ISLR2)
+```
+
+# Gather and Spread
+
+Make the sample stock data:
+
+```{r}
+set.seed(100)
+stocks.df = tibble(date=as.Date('2024-01-01')+0:9, "Apple"=100+cumsum(rnorm(10,0,4)),
+                   "Google"=25+cumsum(rnorm(10,0,2)),
+                   "Wawa"=10+cumsum(rnorm(10,0,0.5)))
+```
+
+```{r}
+stocks.df
+```
+
+Reasonable for tabular presentation of data.
+
+Challenge to plotting:
+
+```{r}
+plt = ggplot(stocks.df,mapping=aes(date,Apple))+geom_point()
+print(plt)
+```
+
+But it would be nice to get all stocks at once, color coded, etc.
+
+## Gather
+
+```{r}
+stocks.long.df = stocks.df %>% gather(key=symbol, value=price,-date)
+stocks.long.df
+```
+
+Main arguments here are:
+
+-   `key` - What we will call the new column. Here, we went from the columns being named after the companies, to having a column that is the company name.
+
+-   `value` - What we will call the new column that holds the values that were previously the entries in the columns above.
+
+-   `-date` -Retain this feature for each entry, this is essential:
+
+```{r}
+stocks.df %>% gather(key=symbol, value=price)
+```
+
+By not doing the `-date` , this just stacks all the columns together.
+
+```{r}
+stocks.long.df$symbol=as_factor(stocks.long.df$symbol)
+```
+
+```{r}
+plt = ggplot(stocks.long.df, aes(date, price, color=symbol))+geom_point()
+print(plt)
+```
+
+## Spread
+
+Suppose we want somethign more like the tabular format that we started with; again, the table looked better (easier to comprehend) than the `stocks.long.df` layout. `spread` undoes the `gather` :
+
+```{r}
+stocks.short.df = stocks.long.df %>% spread(key=symbol, value=price)
+stocks.short.df
+```
+
+This makes a distinct feature (column) for each entry in the `symbol` column(feature).
+
+# Kables
+
+To make nicely formatted tables that can be repsented, we use `kables` . These can be exported to Word, HTML, and Latex.
+
+```{r}
+library(knitr) # this provies the kable
+library(kableExtra) # this provides formatting features for kables
+```
+
+```{r}
+kable(stocks.df)
+```
+
+```{r}
+kable(Auto) # this prints row "names", 1,2 ,3, 4...
+```
+
+```{r}
+kable(Auto, row.names = FALSE)
+```
+
+Formatting kables:
+
+```{r}
+stocks.kb = kable(stocks.df, caption="Stocks Example") %>% kable_classic("striped", font_size=14)
+stocks.kb
+```
+
+```{r}
+stocks.kb = kable(stocks.df, caption="Stocks Example") %>% kable_classic(full_width=FALSE,"striped", font_size=14)
+stocks.kb
+```
+
+```{r}
+stocks.kb = kable(stocks.df, caption="Stocks Example") %>% kable_material(full_width=FALSE,"striped", font_size=10)
+stocks.kb
+```
