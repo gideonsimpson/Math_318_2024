@@ -1,0 +1,181 @@
+---
+title: "Lecture 2/5/2024"
+output: html_notebook
+---
+
+```{r}
+library(tidyverse)
+```
+
+# More Tables
+
+Exporting for Excel/Word/etc.
+
+Standard approach is to turn into something that can exported as a CSV file, and then use `write_csv`
+
+## Simple example
+
+```{r}
+set.seed(123)
+xdata = rnorm(20)
+xdata
+```
+
+Store as a data frame, first:
+
+```{r}
+xdata.df = tibble(x=xdata)
+xdata.df
+```
+
+```{r}
+write_csv(xdata.df, "simple1.csv")
+```
+
+This `.csv` can then be read into Excel/Word/etc.
+
+### Getting the summary out
+
+```{r}
+summary(xdata.df)
+```
+
+This does NOT work
+
+```{r}
+summary.df = as_tibble(summary(xdata.df))
+```
+
+If we can't turn this into a data frame, we can't export as a `.csv`
+
+Instead, we use the `summarize` command:
+
+```{r}
+xdata.df %>% summarise(mean(x))
+```
+
+```{r}
+xdata.df %>% summarise(mean(x), median(x))
+```
+
+We can reconstruct the full `summary` output in tibble format:
+
+```{r}
+xdata.df %>% summarise(min(x), 
+                       quantile(x,0.25),
+                       median(x),
+                       mean(x),
+                       quantile(0,0.75),
+                       max(x))
+```
+
+```{r}
+xdata.summary.df = xdata.df %>% summarise(min(x), 
+                       quantile(x,0.25),
+                       median(x),
+                       mean(x),
+                       quantile(0,0.75),
+                       max(x))
+```
+
+```{r}
+write_csv(xdata.summary.df, "xsummary.csv")
+```
+
+Suppose we want transpose for exporting,
+
+```{r}
+t(xdata.summary.df)
+```
+
+```{r}
+names(xdata.summary.df)
+```
+
+```{r}
+cbind(stat=names(xdata.summary.df), t(xdata.summary.df))
+```
+
+```{r}
+xdata.summary.df.t = as_tibble(t(xdata.summary.df))
+```
+
+```{r}
+write_csv(xdata.summary.df.t, "xsummaryt.csv")
+```
+
+## mtcars example
+
+```{r}
+mtcars # built in data set
+```
+
+Convert to tibble, and keep the row names:
+
+```{r}
+mtcars.df = as_tibble(mtcars, rownames="model") # need the rownames to retain the information
+mtcars.df
+```
+
+```{r}
+summary(mtcars.df)
+```
+
+To the export the summary for each property, we first use `gather` :
+
+```{r}
+mtcars.long.df = gather(mtcars.df, key="property", value ="value", -model)
+mtcars.long.df
+```
+
+This gets us closer to where we want.
+
+```{r}
+mtcars.long.df %>% group_by(property) %>% summarize(Mean=mean(value), 
+                                                    Median=median(value))
+```
+
+```{r}
+mtcars.stats = mtcars.long.df %>% 
+  group_by(property) %>% 
+  summarize(Mean=mean(value), 
+            Median=median(value))
+write_csv(mtcars.stats, "mtcars1.csv")
+```
+
+### Transposed layout
+
+```{r}
+mtcars.stats.t = as_tibble(t(mtcars.stats[-1]), rownames="stat")
+mtcars.stats.t
+```
+
+But notice we've lost the labels on top.
+
+```{r}
+mtcars.stats$property
+```
+
+See the column names:
+
+```{r}
+names(mtcars.stats.t)
+```
+
+Exclude the first one, as it is correct:
+
+```{r}
+names(mtcars.stats.t[-1])
+```
+
+Reassign the names:
+
+```{r}
+names(mtcars.stats.t)[-1] = mtcars.stats$property
+```
+
+```{r}
+mtcars.stats.t
+```
+
+This can now be exported
