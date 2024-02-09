@@ -1,0 +1,113 @@
+---
+title: "Lecture 2/9/2024"
+output: html_notebook
+---
+
+```{r}
+library(tidyverse)
+library(ISLR2)
+```
+
+# Regression with Nonlinear Features
+
+## Motivation
+
+```{r}
+set.seed(100)
+x = runif(100, min=0, max = 4)
+y = x + .5 * x**2 -.25 * x**3 + rnorm(100, sd=.1)
+df = tibble(x=x, y=y)
+```
+
+```{r}
+xy.plt = ggplot(df, aes(x,y)) + geom_point()
+print(xy.plt)
+```
+
+This is a plot of
+
+$$
+Y = X + .5 X^2 -.25 X^3 + \epsilon
+$$
+
+We will fit a **linear** model with **nonlinear** features.
+
+## Try a series of polynomial models
+
+#### Linear
+
+This is bad, but this is an example of a bad fit:
+
+```{r}
+plt = ggplot(df, aes(x,y)) + geom_point() + 
+  geom_smooth(method=lm, formula = y~x)
+print(plt)
+```
+
+#### Quadratic
+
+```{r}
+quad.lm = lm(y~x+I(x^2), df) 
+summary(quad.lm)
+```
+
+Note that the `I(x^2)` instructs it to compute the nonlinear transform of the predictor and regress with that.
+
+This command solves the normal equations:
+
+$$
+\mathcal{X}^T\mathcal{X}\boldsymbol{\beta} = \mathcal{X}^T \boldsymbol{y}
+$$
+
+See how well this does, graphically: use `I` inside of `ggplot2`
+
+```{r}
+plt = ggplot(df, aes(x,y)) + geom_point() + 
+  geom_smooth(method=lm, formula = y~x + I(x^2))
+print(plt)
+```
+
+#### Cubic
+
+```{r}
+plt = ggplot(df, aes(x,y)) + geom_point() + 
+  geom_smooth(method=lm, formula = y~x + I(x^2)+I(x^3))
+print(plt)
+```
+
+```{r}
+cubic.lm = lm(y~x+I(x^2)+I(x^3), df) 
+summary(cubic.lm)
+```
+
+#### Quartic
+
+```{r}
+plt = ggplot(df, aes(x,y)) + geom_point() + 
+  geom_smooth(method=lm, formula = y~x + I(x^2)+I(x^3)+I(x^4))
+print(plt)
+```
+
+```{r}
+quartic.lm = lm(y~x+I(x^2)+I(x^3)+I(x^4), df) 
+summary(quartic.lm)
+```
+
+Notice the change in the $p$ values when we increase further, even though the fit is still quite good.
+
+#### Trig functions
+
+```{r}
+plt = ggplot(df, aes(x,y)) + geom_point() + 
+  geom_smooth(method=lm, formula = y~I(sin(x))+I(cos(x)))
+print(plt)
+```
+
+```{r}
+trig.lm = lm(y~I(sin(x))+I(cos(x)), df) 
+summary(trig.lm)
+```
+
+## Remark
+
+Model selection is coming
