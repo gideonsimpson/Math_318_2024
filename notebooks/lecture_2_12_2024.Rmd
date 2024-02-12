@@ -1,0 +1,119 @@
+---
+title: "2/12/2024 Lecture"
+output: html_notebook
+---
+
+```{r}
+library(tidyverse)
+```
+
+# Nearest Neighbors Regression
+
+Need `FNN` for nearest neighbors regression:
+
+```{r}
+library(FNN)
+```
+
+## Create Toy Data
+
+$$
+Y = X + \sin(2\pi x) (1+\epsilon)
+$$
+
+where $\epsilon\approx N(0,\gamma^2)$ random noise,
+
+Think of this as the *training* data set:
+
+```{r}
+set.seed(100)
+n = 25
+x = runif(n, min =0, max = 10)
+y = x + sin(2*pi*x)* (1+.1 * rnorm(x)) # noisy versions of y = x + sin(2*pi*x)
+xy.df = tibble(x=x,y=y)
+xy.df
+
+```
+
+Define a scalar real valued function in R:
+
+```{r}
+true_f = function(x){x+ sin(2*pi*x)}
+true_f(5.25)
+```
+
+```{r}
+plt = ggplot(xy.df, aes(x,y))+geom_point() +
+  stat_function(fun=true_f,linetype="dashed", color="red")
+print(plt)
+```
+
+## Create the Test Points
+
+These are points for which we want to evaluate our model:
+
+```{r}
+test.x = seq(0,10,,length.out=51)
+test.df = tibble(x=test.x, y = rep(0, length(test.x)))
+test.df
+```
+
+We want to the same structure as the other data frame, so we pad the `y` value with 0's. We could also do `NA` .
+
+The kNN method assumes we are working with **matrices** not data frames:
+
+```{r}
+test.df[,1] # need this as a matrix
+```
+
+```{r}
+as.matrix(test.df[,1])
+```
+
+## Predict
+
+```{r}
+y_pred= knn.reg(as.matrix(xy.df[,1]),
+                test=as.matrix(test.df[,1]),
+                as.matrix(xy.df[,2]),
+                k=3)
+```
+
+`knn.reg` takes 4 arguments:
+
+-   The first argument are the x coordinates of the data we have
+
+-   The third argument are the y coordinates (the response variable) of the data we have
+
+-   The second argument are the new points we want to evaluate/estimate at
+
+-   The fourth argument is how many neighbors to use
+
+This returns a data structure, and the predicted values are stored in teh `pred` entry:
+
+```{r}
+print(y_pred) # the data structure
+y_pred$pred # the array of predicted values
+```
+
+**NOTE** This goes directly to predictions, there is no intermediate fitting of coefficients as with `lm`
+
+Visualize and come to what this means:
+
+```{r}
+test.df$y =y_pred$pred
+plt = ggplot(xy.df, aes(x,y))+geom_point() +
+  stat_function(fun=true_f,linetype="dashed", color="red") +
+  geom_point(test.df, mapping=aes(x,y),color="blue",)
+print(plt)
+```
+
+## Questions
+
+-   What happens when $k$ gets big? This smooths out, and as $k$ approaches the size of hte data set, it will predict the sample mean for all $x$
+
+-   What happens if we had a lot less data? It struggles when there is a shortage of data.
+
+# Classification Problems
+
+[MnistExamplesModified - MNIST database - Wikipedia](https://en.wikipedia.org/wiki/MNIST_database#/media/File:MnistExamplesModified.png)
