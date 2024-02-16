@@ -1,0 +1,62 @@
+---
+title: "2/14/2024 Lecture"
+output: html_notebook
+---
+
+```{r}
+library(tidyverse)
+library(ISLR2)
+```
+
+# Linear Regression Problem
+
+Look `Default` data set. This is from `ISLR2`
+
+```{r}
+Default = as_tibble(Default) 
+Default
+```
+
+Would like to predict if someone will default, based on the other features (student, balance, and income).
+
+Try to fit a linear model,
+
+$$
+Y \approx \beta_0 + \beta_1 \times \text{income}
+$$
+
+Visualize this:
+
+```{r}
+lm.plt = ggplot(Default, aes(x=balance, y = as.numeric(default) -1)) +geom_point()
+print(lm.plt)
+```
+
+**NOTE** `as.numeric` turns the categorical variables into 1,2, 3,.etc. as appropriate:
+
+```{r}
+ as.numeric(Default$default)[1:500]
+```
+
+`1` corresponds to `no` and `1` corresponds to `yes` .
+
+Add the regression in:
+
+```{r}
+lm.plt= lm.plt + geom_smooth(method=lm, formula = y~x)
+print(lm.plt)
+```
+
+Gives numbers between, $\approx (-0.1, 0.3)$ , terrible for making predictions of default or not.
+
+This is an example of why linear regression is terrible for classification problems.
+
+# Logistic Regression
+
+```{r}
+logistic.glm.plt = ggplot(Default, aes(x=balance, y = as.numeric(default) -1)) +geom_point()
+logistic.glm.plt = logistic.glm.plt + geom_smooth(method = glm, formula = y~x, method.args = list(family="binomial"))
+print(logistic.glm.plt)
+```
+
+We have used `glm` instead of `lm` , and we have used `binomial` to set to logistic regression.
