@@ -42,7 +42,17 @@ mixture.df <- tibble("class"=class, "x"=x)
 mixture.df
 ```
 
-### Train the LDA Model
+```{r}
+hist.split = ggplot(mixture.df, aes(x=x, fill=class)) + 
+  geom_histogram(alpha=0.5, bins=50, position ="identity") + 
+  ggtitle("Data Split by Class") + labs(fill="Class")
+#show the plot 
+print(hist.split)
+```
+
+Note the overlap region; this is where the errors will be.
+
+###  the LDA Model
 
 ```{r}
 lda.fit = lda(class~x, data = mixture.df) # fits the LDA classifier, given the data, and the model class ~ x
@@ -71,8 +81,13 @@ mean(lda.df$correct)
 Visualize
 
 ```{r}
-plot.lda = ggplot(data = lda.df, aes(shape=pred, color=correct)) + geom_point(aes(x=x,y=p)) + ggtitle("LDA Classifier")print(plot.lda)
+plot.lda = ggplot(data = lda.df, aes(shape=pred, color=correct)) + 
+  geom_point(aes(x=x,y=p)) + 
+  ggtitle("LDA Classifier")
+print(plot.lda)
 ```
+
+Note: The errors all occur in the region where the Gaussians overlap.
 
 ### Compare with Logistic
 
@@ -91,6 +106,8 @@ logistic.df=tibble(x=mixture.df$x, true = mixture.df$class,
 mean(logistic.df$correct)
 ```
 
+Not so different than LDA.
+
 ```{r}
 plot.logistic= ggplot(data = logistic.df, aes(shape=pred, color=correct)) +
   geom_point(aes(x=x,y=p)) + 
@@ -99,7 +116,7 @@ print(plot.logistic)
 
 ```
 
-## LDA in 2 Variables
+## LDA in 2 Variables with More Classes
 
 ### Generate mixture model data
 
@@ -151,6 +168,10 @@ mixture2d.plt=ggplot(train.df, aes(color=class)) +
   geom_point(aes(x=x,y=y))
 print(mixture2d.plt)
 
+```
+
+```{r}
+train.df
 ```
 
 ### Train the LDA
