@@ -52,7 +52,7 @@ print(hist.split)
 
 Note the overlap region; this is where the errors will be.
 
-###  the LDA Model
+### the LDA Model
 
 ```{r}
 lda.fit = lda(class~x, data = mixture.df) # fits the LDA classifier, given the data, and the model class ~ x
