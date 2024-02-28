@@ -1,0 +1,65 @@
+---
+title: "2/28/2024 Lecture"
+output: html_notebook
+---
+
+```{r}
+library(tidyverse)
+```
+
+# Model Error
+
+## Testing Variability
+
+After fitting a model with a training set for
+
+$$
+Y = \beta_0 + \beta_1 X + \epsilon
+$$
+
+Generate many testing sets and look at the variability of the testing mean squared error:
+
+```{r}
+# reset seed
+set.seed(100)
+
+# number of samples
+n = 100
+# create x values in training set
+x = runif(n, 0,15)
+# set true coefficients
+beta0_true = 2.
+beta1_true = -1.5
+# set noise parameters
+eps = 1.
+# create y values in training set
+y = beta0_true + beta1_true*x + eps * rnorm(length(x))
+train.df= tibble("x"=x, "y"=y)
+
+# train the linear model on the fixed training set, this is the \hat{f}
+lm.fit=lm(y~x, train.df)
+
+# testing error
+n_tests = 10^4 # number of independent testing sets to generate
+MSE = numeric(n_tests) # preallocate storage for the errros
+for(j in 1:n_tests){
+  # each of these data sets is of size n, and we generate n_tests of them
+  x = runif(n,0,15)
+  y = beta0_true + beta1_true*x + eps * rnorm(length(x))
+  test.df <- tibble("x"=x, "y"=y)
+  # MSE from the j-th testing set trial
+  MSE[j]=mean((predict(lm.fit,test.df) -test.df$y)^2)
+}
+
+# histogram the errors
+MSE.df=tibble("MSE"=MSE)
+
+MSE.plt=ggplot(MSE.df) + geom_histogram(aes(x=MSE),bins = 15) +
+  ggtitle("Mean Squared Error of a Linear Model",
+          subtitle = sprintf("%d Independent Test Sets of Size %d", n_tests, n)) +
+  theme_classic()
+print(MSE.plt)
+
+```
+
+There is real variability in MSE
