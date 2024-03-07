@@ -58,7 +58,7 @@ lambda.grid
 Perform ridge regression
 
 ```{r}
-ridge.fit = glmnet(X,y, alpha = 0, lambda = lambda.grid, lambda.min.ratio=0)
+ridge.fit = glmnet(X,y, alpha = 0, lambda = lambda.grid)
 ridge.fit
 ```
 
@@ -119,7 +119,7 @@ mean(y)
 This shows that when $\lambda$ is large, we have zeroed out all the coefficients, and our prediction is $\hat{\beta}_0$, which is just `mean(y)`
 
 ```{r}
-predict(ridge.fit, s=.1, newx=t(runif(1:600)))
+predict(ridge.fit, s=.1, newx=t(runif(p)))
 ```
 
 ## Cross Validate
@@ -153,13 +153,69 @@ scale_x_log10()
 print(cv.plt)
 ```
 
-```{r}
-cv.df
-```
-
 Extract the coefficients at the estimated optimal choice of $\lambda$:
 
 ```{r}
 beta.minimal = predict(ridge.fit, type = "coefficients", s = cv.ridge$lambda.min)
-beta.minimal
+beta.minimal[1:10]
+```
+
+# LASSO
+
+## Apply LASSO
+
+```{r}
+lasso.fit = glmnet(X,y, alpha = 1, lambda = lambda.grid)
+lasso.fit
+```
+
+## Evaluate Results
+
+```{r}
+beta.lasso = as.matrix(coef(lasso.fit))
+beta.lasso.df = as_tibble(beta.lasso)
+beta.lasso.df$coef = row.names(beta.lasso)
+beta.lasso.df
+```
+
+```{r}
+# spread out
+beta.lasso.df.long = gather(beta.lasso.df,key=case,value,-coef)
+# relabel columns
+beta.lasso.df.long$case = as.integer(gsub("s", "", beta.lasso.df.long$case))
+beta.lasso.df.long$lambda =lasso.fit$lambda[beta.lasso.df.long$case+1]
+beta.lasso.df.long
+```
+
+```{r}
+# plot all coefficients
+beta.lasso.plt = ggplot(beta.lasso.df.long[beta.lasso.df.long$coef!="(Intercept)",], 
+                   aes(x=lambda, y=value,color = coef,linetype = coef)) + 
+  geom_line() + theme(legend.position="none") +
+  scale_x_log10()  + 
+  ggtitle("LASSO Coefficients") + 
+  ylab("Coefficients")
+print(beta.lasso.plt)
+```
+
+## Cross Validate
+
+```{r}
+cv.lasso = cv.glmnet(X, y, alpha = 1, lambda = lambda.grid)
+```
+
+```{r}
+cv.lasso.df=tibble(lambda=cv.lasso$lambda, 
+            cvm=cv.lasso$cvm, 
+            cvlo=cv.lasso$cvlo,
+            cvup=cv.lasso$cvup)
+
+cv.plt = ggplot(cv.lasso.df) + geom_point(aes(x=lambda,y=cvm),color="red") +
+geom_errorbar(aes(x=lambda, ymin=cvlo, ymax=cvup),alpha = .25) +
+geom_vline(xintercept = cv.lasso$lambda.min,linetype = "dashed")+
+geom_vline(xintercept = cv.lasso$lambda.1se,linetype = "dashed")+
+ggtitle("LASSO Error") +
+ylab("Cross Validated MSE") +
+scale_x_log10()
+print(cv.plt)
 ```
