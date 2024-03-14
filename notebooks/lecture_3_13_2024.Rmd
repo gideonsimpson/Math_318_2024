@@ -33,7 +33,7 @@ library(ggfortify)
 
 ## Toy Problem
 
-Compute the two principal componetns
+Compute the two principal components
 
 ```{r}
 pr.out = prcomp(xy.samples)
@@ -45,6 +45,8 @@ Squares of the standard devs are the eigenvalues:
 ```{r}
 pr.out$sdev^2
 ```
+
+These are $\lambda_1$ and $\lambda_2$.
 
 Proportion of variance explained (PVE):
 
