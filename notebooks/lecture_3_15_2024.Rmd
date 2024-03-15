@@ -5,7 +5,7 @@ output: html_notebook
 
 ```{r}
 library(tidyverse)
-library(ggfortify)
+library(ggfortify) # for k-means
 library(mvtnorm)
 ```
 
@@ -58,6 +58,10 @@ sum(kmeans.out$withinss)
 Visualize
 
 ```{r}
+summary(as_factor(kmeans.out$cluster))
+```
+
+```{r}
 kmeans.out  = kmeans(clusters.samples, 2, nstart = 50)
 clusters.samples = mutate(clusters.samples, cluster=as.factor(kmeans.out$cluster))
 kmeans.plt = ggplot(data =clusters.samples, 
@@ -84,7 +88,7 @@ print(kmeans.pca.plt)
 ## Application to Iris data set
 
 ```{r}
-iris.df <- read_csv("../data/iris.data",col_names=FALSE)
+iris.df <- read_csv("../data/iris/iris.data",col_names=FALSE)
 colnames(iris.df) <- c("sepal.length", "sepal.width", 
                        "petal.length", "petal.width", "class")
 iris.df$class <- as_factor(iris.df$class)
@@ -99,6 +103,8 @@ pca.iris.plt <- autoplot(pca.iris, data =iris.df,
 print(pca.iris.plt)
 
 ```
+
+Pretend we don't know the iris types:
 
 ```{r}
 set.seed(500)
